@@ -175,9 +175,9 @@ class _TutorsScreenState extends State<TutorsScreen> {
           extractdata['tutors'].forEach((v) {
             tutorsList.add(Tutors.fromJson(v));
           });
-          titlecenter = tutorsList.length.toString() + " Products Available";
+          titlecenter = tutorsList.length.toString() + " Tutor Available";
         } else {
-          titlecenter = "No Subject Available";
+          titlecenter = "No Tutor Available";
           tutorsList.clear();
         }
         setState(() {});

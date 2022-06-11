@@ -167,7 +167,7 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
           extractdata['subjects'].forEach((v) {
             subjectsList.add(Subjects.fromJson(v));
           });
-          titlecenter = subjectsList.length.toString() + " Products Available";
+          titlecenter = subjectsList.length.toString() + " Subject Available";
         } else {
           titlecenter = "No Subject Available";
           subjectsList.clear();
