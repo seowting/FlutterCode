@@ -133,7 +133,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       height: 35,
                       child: ElevatedButton(
                         child: const Text("Login",
-                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                            style: TextStyle(
+                                fontSize: 14, fontWeight: FontWeight.bold)),
                         onPressed: _loginUser,
                       ),
                     ),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mytutor/views/loginscreen.dart';
+import 'package:mytutor/views/subjectsscreen.dart';
+import 'package:mytutor/views/tutorsscreen.dart';
 
 import '../models/user.dart';
 
@@ -15,8 +17,45 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
+  late double screenHeight, screenWidth, ctrwidth;
+  int _selectedIndex = 0;
+
+  static const TextStyle optionStyle =
+      TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
+  static const List<Widget> _widgetOptions = <Widget>[
+    SubjectsScreen(),
+    TutorsScreen(),
+    Text(
+      'Subscribe',
+      style: optionStyle,
+    ),
+    Text(
+      'Favourite',
+      style: optionStyle,
+    ),
+    Text(
+      'Profile',
+      style: optionStyle,
+    ),
+  ];
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    screenHeight = MediaQuery.of(context).size.height;
+    screenWidth = MediaQuery.of(context).size.width;
+    if (screenWidth >= 800) {
+      ctrwidth = screenWidth / 1.5;
+    }
+    if (screenWidth < 800) {
+      ctrwidth = screenWidth;
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('MY Tutor',
@@ -34,42 +73,81 @@ class _MainScreenState extends State<MainScreen> {
               ),
             ),
             _createDrawerItem(
-              icon: Icons.school,
-              text: 'Find Tutor',
-              onTap: () {},
+              icon: Icons.subject,
+              text: 'Subjects',
+              onTap: () => {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (BuildContext context) =>
+                            const SubjectsScreen()))
+              },
             ),
             _createDrawerItem(
-              icon: Icons.subject,
-              text: 'Find Subject',
-              onTap: () {},
+              icon: Icons.school,
+              text: 'Tutors',
+              onTap: () => {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (BuildContext context) =>
+                            const TutorsScreen()))
+              },
             ),
             _createDrawerItem(
               icon: Icons.calendar_month,
-              text: 'My Appointment',
+              text: 'Subscribe',
               onTap: () {},
             ),
             _createDrawerItem(
-              icon: Icons.home,
-              text: 'My Profile',
+              icon: Icons.star,
+              text: 'Favourite',
+              onTap: () {},
+            ),
+            _createDrawerItem(
+              icon: Icons.person,
+              text: 'Profile',
               onTap: () {},
             ),
             _createDrawerItem(
               icon: Icons.logout,
               text: 'Logout',
               onTap: () => {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (BuildContext context) => const LoginScreen()))
+                _logoutDialog(),
               },
             ),
           ],
         ),
       ),
-      body: const Center(
-        child: Text('Welcome to MY Tutor',
-            style: TextStyle(
-                fontSize: 30, fontWeight: FontWeight.bold, color: Colors.red)),
+      body: Center(
+        child: _widgetOptions.elementAt(_selectedIndex),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        backgroundColor: Colors.black,
+        selectedItemColor: Colors.redAccent,
+        unselectedItemColor: Colors.blueGrey,
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(icon: Icon(Icons.subject), label: 'Subjects'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.school),
+            label: 'Tutors',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.calendar_month),
+            label: 'Subscribe',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.star),
+            label: 'Favourite',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Profile',
+          ),
+        ],
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
       ),
     );
   }
@@ -89,6 +167,47 @@ class _MainScreenState extends State<MainScreen> {
         ],
       ),
       onTap: onTap,
+    );
+  }
+
+  void _logoutDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(20.0))),
+          title: const Text(
+            "Logout",
+            style: TextStyle(),
+          ),
+          content: const Text("Are you sure?", style: TextStyle()),
+          actions: <Widget>[
+            TextButton(
+              child: const Text(
+                "Yes",
+                style: TextStyle(),
+              ),
+              onPressed: () async {
+                Navigator.pop(context);
+                Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                        builder: (content) => const LoginScreen()));
+              },
+            ),
+            TextButton(
+              child: const Text(
+                "No",
+                style: TextStyle(),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }
