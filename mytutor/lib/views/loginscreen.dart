@@ -73,6 +73,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: TextFormField(
                         controller: _emailController,
                         decoration: InputDecoration(
+                            labelText: 'Email',
                             hintText: "Email",
                             border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(5.0))),
@@ -100,6 +101,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: TextFormField(
                         controller: _passwordController,
                         decoration: InputDecoration(
+                            labelText: 'Password',
                             hintText: "Password",
                             border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(5.0))),

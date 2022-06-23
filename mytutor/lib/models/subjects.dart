@@ -27,7 +27,7 @@ class Subjects {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = Map<String, dynamic>();
+    final Map<String, dynamic> data = <String, dynamic>{};
     data['subject_id'] = subjectId;
     data['subject_name'] = subjectName;
     data['subject_description'] = subjectDescription;

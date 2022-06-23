@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:mytutor/views/loginscreen.dart';
 
 import '../constants.dart';
 import '../models/subjects.dart';
@@ -20,11 +21,13 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
   String titlecenter = "Loading...";
   var numofpage, curpage = 1;
   var color;
+  TextEditingController searchController = TextEditingController();
+  String search = "";
 
   @override
   void initState() {
     super.initState();
-    _loadSubjects(1);
+    _loadSubjects(1, search);
   }
 
   @override
@@ -38,6 +41,24 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
     }
 
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Subjects List',
+            style: TextStyle(fontWeight: FontWeight.bold)),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () {
+              _loadSearchDialog();
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () {
+              _logoutDialog();
+            },
+          )
+        ],
+      ),
       body: subjectsList.isEmpty
           ? Center(
               child: Text(titlecenter,
@@ -132,7 +153,7 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
                       return SizedBox(
                         width: 40,
                         child: TextButton(
-                            onPressed: () => {_loadSubjects(index + 1)},
+                            onPressed: () => {_loadSubjects(index + 1, search)},
                             child: Text(
                               (index + 1).toString(),
                               style: TextStyle(color: color),
@@ -146,12 +167,15 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
     );
   }
 
-  void _loadSubjects(int pageno) {
+  void _loadSubjects(int pageno, String _search) {
     curpage = pageno;
     numofpage ?? 1;
     http.post(
         Uri.parse(CONSTANTS.server + "/mytutor/mobile/php/load_subjects.php"),
-        body: {'pageno': pageno.toString()}).timeout(
+        body: {
+          'pageno': pageno.toString(),
+          'search': _search,
+        }).timeout(
       const Duration(seconds: 5),
       onTimeout: () {
         return http.Response('Error', 408);
@@ -213,12 +237,12 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
                   "Subject ID: " + subjectsList[index].subjectId.toString(),
                   style: const TextStyle(fontSize: 14),
                 ),
-                const SizedBox(height: 5),
+                const SizedBox(height: 10),
                 Text(
                     "Subject Description: \n" +
                         subjectsList[index].subjectDescription.toString(),
                     style: const TextStyle(fontSize: 14)),
-                const SizedBox(height: 5),
+                const SizedBox(height: 10),
                 Text(
                     "Price: RM " +
                         double.parse(
@@ -226,15 +250,15 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
                             .toStringAsFixed(2),
                     style: const TextStyle(
                         fontSize: 14, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 5),
+                const SizedBox(height: 10),
                 Text("Tutor ID: " + subjectsList[index].tutorId.toString(),
                     style: const TextStyle(fontSize: 14)),
-                const SizedBox(height: 5),
+                const SizedBox(height: 10),
                 Text(
                     "Subject Session: " +
                         subjectsList[index].subjectSessions.toString(),
                     style: const TextStyle(fontSize: 14)),
-                const SizedBox(height: 5),
+                const SizedBox(height: 10),
                 Text("Rating: " + subjectsList[index].subjectRating.toString(),
                     style: const TextStyle(fontSize: 14, color: Colors.red)),
               ]),
@@ -252,5 +276,98 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
             ],
           );
         });
+  }
+
+  void _loadSearchDialog() {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text(
+              "Search ",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            content: SizedBox(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: searchController,
+                    decoration: InputDecoration(
+                        labelText: 'Search',
+                        hintText: "Search Subject Name",
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(5.0))),
+                    keyboardType: TextInputType.emailAddress,
+                  ),
+                  const SizedBox(height: 5),
+                  ElevatedButton(
+                    onPressed: () {
+                      search = searchController.text;
+                      Navigator.of(context).pop();
+                      _loadSubjects(1, search);
+                      setState(() {
+                        searchController.clear();
+                      });
+                    },
+                    child: const Text("Search"),
+                  )
+                ],
+              ),
+            ),
+            actions: <Widget>[
+              TextButton(
+                child: const Text(
+                  "Close",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              )
+            ],
+          );
+        });
+  }
+
+  void _logoutDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(20.0))),
+          title: const Text(
+            "Logout",
+            style: TextStyle(),
+          ),
+          content: const Text("Are you sure?", style: TextStyle()),
+          actions: <Widget>[
+            TextButton(
+              child: const Text(
+                "Yes",
+                style: TextStyle(),
+              ),
+              onPressed: () async {
+                Navigator.pop(context);
+                Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                        builder: (content) => const LoginScreen()));
+              },
+            ),
+            TextButton(
+              child: const Text(
+                "No",
+                style: TextStyle(),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 }

@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:mytutor/views/loginscreen.dart';
 
 import '../constants.dart';
 import '../models/tutors.dart';
@@ -22,6 +23,8 @@ class _TutorsScreenState extends State<TutorsScreen> {
   String titlecenter = "Loading...";
   var numofpage, curpage = 1;
   var color;
+  //TextEditingController searchController = TextEditingController();
+  //String search = "";
 
   @override
   void initState() {
@@ -40,6 +43,24 @@ class _TutorsScreenState extends State<TutorsScreen> {
     }
 
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Tutors List',
+            style: TextStyle(fontWeight: FontWeight.bold)),
+        actions: [
+          // IconButton(
+          //   icon: const Icon(Icons.search),
+          //   onPressed: () {
+          //     _loadSearchDialog();
+          //   },
+          // ),
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () {
+              _logoutDialog();
+            },
+          )
+        ],
+      ),
       body: tutorsList.isEmpty
           ? Padding(
               padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
@@ -159,7 +180,10 @@ class _TutorsScreenState extends State<TutorsScreen> {
     numofpage ?? 1;
     http.post(
         Uri.parse(CONSTANTS.server + "/mytutor/mobile/php/load_tutors.php"),
-        body: {'pageno': pageno.toString()}).timeout(
+        body: {
+          'pageno': pageno.toString(),
+          //'search': _search,
+        }).timeout(
       const Duration(seconds: 5),
       onTimeout: () {
         return http.Response('Error', 408);
@@ -221,22 +245,27 @@ class _TutorsScreenState extends State<TutorsScreen> {
                   "Tutor ID: " + tutorsList[index].tutorId.toString(),
                   style: const TextStyle(fontSize: 14),
                 ),
-                const SizedBox(height: 5),
+                const SizedBox(height: 10),
                 Text("Phone No: " + tutorsList[index].tutorPhone.toString(),
                     style: const TextStyle(fontSize: 14)),
-                const SizedBox(height: 5),
+                const SizedBox(height: 10),
                 Text("Email: " + tutorsList[index].tutorEmail.toString(),
                     style: const TextStyle(fontSize: 14)),
-                const SizedBox(height: 5),
+                const SizedBox(height: 10),
                 Text(
                     "Tutor Description: \n" +
                         tutorsList[index].tutorDescription.toString(),
                     style: const TextStyle(fontSize: 14)),
-                const SizedBox(height: 5),
+                const SizedBox(height: 10),
+                Text(
+                  "Subject List: " + tutorsList[index].subjectList.toString(),
+                  style: const TextStyle(fontSize: 14),
+                ),
+                const SizedBox(height: 10),
                 Text("Password: " + tutorsList[index].tutorPassword.toString(),
                     style: const TextStyle(
                         fontSize: 14, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 5),
+                const SizedBox(height: 10),
                 Text(
                     "Date Register: " +
                         df.format(DateTime.parse(
@@ -257,5 +286,96 @@ class _TutorsScreenState extends State<TutorsScreen> {
             ],
           );
         });
+  }
+
+  // void _loadSearchDialog() {
+  //   showDialog(
+  //       context: context,
+  //       builder: (BuildContext context) {
+  //         return AlertDialog(
+  //           title: const Text(
+  //             "Search ",
+  //             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+  //           ),
+  //           content: SizedBox(
+  //             child: Column(
+  //               mainAxisSize: MainAxisSize.min,
+  //               children: [
+  //                 TextField(
+  //                   controller: searchController,
+  //                   decoration: InputDecoration(
+  //                       labelText: 'Search',
+  //                       hintText: "Search Tutor Name",
+  //                       border: OutlineInputBorder(
+  //                           borderRadius: BorderRadius.circular(5.0))),
+  //                   keyboardType: TextInputType.emailAddress,
+  //                 ),
+  //                 const SizedBox(height: 5),
+  //                 ElevatedButton(
+  //                   onPressed: () {
+  //                     search = searchController.text;
+  //                     Navigator.of(context).pop();
+  //                     _loadTutors(1, search);
+  //                     setState( () {searchController.clear();} );
+  //                   },
+  //                   child: const Text("Search"),
+  //                 )
+  //               ],
+  //             ),
+  //           ),
+  //           actions: <Widget>[
+  //             TextButton(
+  //               child: const Text(
+  //                 "Close",
+  //                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+  //               ),
+  //               onPressed: () {
+  //                 Navigator.of(context).pop();
+  //               },
+  //             )
+  //           ],
+  //         );
+  //       });
+  // }
+
+  void _logoutDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(20.0))),
+          title: const Text(
+            "Logout",
+            style: TextStyle(),
+          ),
+          content: const Text("Are you sure?", style: TextStyle()),
+          actions: <Widget>[
+            TextButton(
+              child: const Text(
+                "Yes",
+                style: TextStyle(),
+              ),
+              onPressed: () async {
+                Navigator.pop(context);
+                Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                        builder: (content) => const LoginScreen()));
+              },
+            ),
+            TextButton(
+              child: const Text(
+                "No",
+                style: TextStyle(),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 }
