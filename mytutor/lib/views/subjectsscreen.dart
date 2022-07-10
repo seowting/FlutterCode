@@ -2,14 +2,18 @@ import 'dart:convert';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
+import 'package:mytutor/views/cartscreen.dart';
 import 'package:mytutor/views/loginscreen.dart';
 
 import '../constants.dart';
 import '../models/subjects.dart';
+import '../models/user.dart';
 
 class SubjectsScreen extends StatefulWidget {
-  const SubjectsScreen({Key? key}) : super(key: key);
+  final User user;
+  const SubjectsScreen({Key? key, required this.user}) : super(key: key);
 
   @override
   State<SubjectsScreen> createState() => _SubjectsScreenState();
@@ -51,12 +55,30 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
               _loadSearchDialog();
             },
           ),
+          TextButton.icon(
+            onPressed: () async {
+              await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (content) => CartScreen(
+                            user: widget.user,
+                          )));
+              _loadSubjects(1, search);
+              _loadCartQty();
+            },
+            icon: const Icon(
+              Icons.shopping_cart,
+              color: Colors.white,
+            ),
+            label: Text(widget.user.cart.toString(),
+                style: const TextStyle(color: Colors.white)),
+          ),
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () {
               _logoutDialog();
             },
-          )
+          ),
         ],
       ),
       body: subjectsList.isEmpty
@@ -100,38 +122,57 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
                                           const Icon(Icons.error),
                                     ),
                                   ),
+                                  const SizedBox(height: 20),
+                                  Text(
+                                    subjectsList[index].subjectName.toString(),
+                                    style: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  const SizedBox(height: 5),
                                   Flexible(
                                       flex: 4,
                                       child: Column(
                                         children: [
-                                          const SizedBox(height: 20),
-                                          Text(
-                                            subjectsList[index]
-                                                .subjectName
-                                                .toString(),
-                                            style: const TextStyle(
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.bold),
-                                          ),
-                                          const SizedBox(height: 5),
-                                          Text(
-                                            "RM" +
-                                                double.parse(subjectsList[index]
-                                                        .subjectPrice
-                                                        .toString())
-                                                    .toStringAsFixed(2),
-                                            style:
-                                                const TextStyle(fontSize: 16),
-                                          ),
-                                          const SizedBox(height: 5),
-                                          Text(
-                                            "Rating: " +
-                                                subjectsList[index]
-                                                    .subjectRating
-                                                    .toString(),
-                                            style: const TextStyle(
-                                                fontSize: 16,
-                                                color: Colors.red),
+                                          Row(
+                                            children: [
+                                              Expanded(
+                                                flex: 7,
+                                                child: Column(
+                                                  children: [
+                                                    Text(
+                                                      "RM" +
+                                                          double.parse(subjectsList[
+                                                                      index]
+                                                                  .subjectPrice
+                                                                  .toString())
+                                                              .toStringAsFixed(
+                                                                  2),
+                                                      style: const TextStyle(
+                                                          fontSize: 16),
+                                                    ),
+                                                    const SizedBox(height: 5),
+                                                    Text(
+                                                      "Rating: " +
+                                                          subjectsList[index]
+                                                              .subjectRating
+                                                              .toString(),
+                                                      style: const TextStyle(
+                                                          fontSize: 16,
+                                                          color: Colors.red),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              Expanded(
+                                                  flex: 3,
+                                                  child: IconButton(
+                                                      onPressed: () {
+                                                        _addToCartDialog(index);
+                                                      },
+                                                      icon: const Icon(Icons
+                                                          .shopping_cart))),
+                                            ],
                                           ),
                                         ],
                                       ))
@@ -178,6 +219,12 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
         }).timeout(
       const Duration(seconds: 5),
       onTimeout: () {
+        return http.Response('Error', 408);
+      },
+    ).timeout(
+      const Duration(seconds: 5),
+      onTimeout: () {
+        titlecenter = "Timeout! Please try again later thank you";
         return http.Response('Error', 408);
       },
     ).then((response) {
@@ -264,6 +311,13 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
               ]),
             ])),
             actions: [
+              SizedBox(
+                  width: screenWidth / 1,
+                  child: ElevatedButton(
+                      onPressed: () {
+                        _addToCartDialog(index);
+                      },
+                      child: const Text("Subscribe"))),
               TextButton(
                 child: const Text(
                   "Close",
@@ -369,5 +423,103 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
         );
       },
     );
+  }
+
+  void _addToCartDialog(int index) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(20.0))),
+          title: const Text(
+            "Subscribe",
+            style: TextStyle(),
+          ),
+          content: const Text(
+              "Are you sure you want to subscribe this subject to your cart?",
+              style: TextStyle()),
+          actions: <Widget>[
+            TextButton(
+              child: const Text(
+                "Yes",
+                style: TextStyle(),
+              ),
+              onPressed: () async {
+                Navigator.pop(context);
+                _addToCart(index);
+              },
+            ),
+            TextButton(
+              child: const Text(
+                "No",
+                style: TextStyle(),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _addToCart(int index) {
+    http.post(
+        Uri.parse(CONSTANTS.server + "/mytutor/mobile/php/add_to_cart.php"),
+        body: {
+          "useremail": widget.user.email.toString(),
+          "subjectid": subjectsList[index].subjectId.toString(),
+        }).timeout(
+      const Duration(seconds: 5),
+      onTimeout: () {
+        return http.Response('Error', 408);
+      },
+    ).then((response) {
+      print(response.body);
+      var jsondata = jsonDecode(response.body);
+      if (response.statusCode == 200 && jsondata['status'] == 'success') {
+        print(jsondata['data']['carttotal'].toString());
+        setState(() {
+          widget.user.cart = jsondata['data']['carttotal'].toString();
+        });
+        Fluttertoast.showToast(
+            msg: "Success",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            fontSize: 16.0);
+      } else {
+        Fluttertoast.showToast(
+            msg: "Failed, Subject has been subscribed in cart!",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            fontSize: 16.0);
+      }
+    });
+  }
+
+  void _loadCartQty() {
+    http.post(
+        Uri.parse(CONSTANTS.server + "/mytutor/mobile/php/load_cartqty.php"),
+        body: {
+          "useremail": widget.user.email.toString(),
+        }).timeout(
+      const Duration(seconds: 5),
+      onTimeout: () {
+        return http.Response('Error', 408);
+      },
+    ).then((response) {
+      print(response.body);
+      var jsondata = jsonDecode(response.body);
+      if (response.statusCode == 200 && jsondata['status'] == 'success') {
+        print(jsondata['data']['carttotal'].toString());
+        setState(() {
+          widget.user.cart = jsondata['data']['carttotal'].toString();
+        });
+      }
+    });
   }
 }

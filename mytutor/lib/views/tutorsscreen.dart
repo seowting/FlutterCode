@@ -23,8 +23,6 @@ class _TutorsScreenState extends State<TutorsScreen> {
   String titlecenter = "Loading...";
   var numofpage, curpage = 1;
   var color;
-  //TextEditingController searchController = TextEditingController();
-  //String search = "";
 
   @override
   void initState() {
@@ -47,12 +45,6 @@ class _TutorsScreenState extends State<TutorsScreen> {
         title: const Text('Tutors List',
             style: TextStyle(fontWeight: FontWeight.bold)),
         actions: [
-          // IconButton(
-          //   icon: const Icon(Icons.search),
-          //   onPressed: () {
-          //     _loadSearchDialog();
-          //   },
-          // ),
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () {
@@ -182,7 +174,6 @@ class _TutorsScreenState extends State<TutorsScreen> {
         Uri.parse(CONSTANTS.server + "/mytutor/mobile/php/load_tutors.php"),
         body: {
           'pageno': pageno.toString(),
-          //'search': _search,
         }).timeout(
       const Duration(seconds: 5),
       onTimeout: () {
@@ -287,56 +278,6 @@ class _TutorsScreenState extends State<TutorsScreen> {
           );
         });
   }
-
-  // void _loadSearchDialog() {
-  //   showDialog(
-  //       context: context,
-  //       builder: (BuildContext context) {
-  //         return AlertDialog(
-  //           title: const Text(
-  //             "Search ",
-  //             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-  //           ),
-  //           content: SizedBox(
-  //             child: Column(
-  //               mainAxisSize: MainAxisSize.min,
-  //               children: [
-  //                 TextField(
-  //                   controller: searchController,
-  //                   decoration: InputDecoration(
-  //                       labelText: 'Search',
-  //                       hintText: "Search Tutor Name",
-  //                       border: OutlineInputBorder(
-  //                           borderRadius: BorderRadius.circular(5.0))),
-  //                   keyboardType: TextInputType.emailAddress,
-  //                 ),
-  //                 const SizedBox(height: 5),
-  //                 ElevatedButton(
-  //                   onPressed: () {
-  //                     search = searchController.text;
-  //                     Navigator.of(context).pop();
-  //                     _loadTutors(1, search);
-  //                     setState( () {searchController.clear();} );
-  //                   },
-  //                   child: const Text("Search"),
-  //                 )
-  //               ],
-  //             ),
-  //           ),
-  //           actions: <Widget>[
-  //             TextButton(
-  //               child: const Text(
-  //                 "Close",
-  //                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-  //               ),
-  //               onPressed: () {
-  //                 Navigator.of(context).pop();
-  //               },
-  //             )
-  //           ],
-  //         );
-  //       });
-  // }
 
   void _logoutDialog() {
     showDialog(

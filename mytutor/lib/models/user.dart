@@ -5,6 +5,7 @@ class User {
   String? password;
   String? phoneno;
   String? homeaddress;
+  String? cart;
 
   User(
       {this.id,
@@ -12,7 +13,8 @@ class User {
       this.email,
       this.password,
       this.phoneno,
-      this.homeaddress});
+      this.homeaddress,
+      this.cart});
 
   User.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -21,6 +23,7 @@ class User {
     password = json['password'];
     phoneno = json['phoneno'];
     homeaddress = json['homeaddress'];
+    cart = json['cart'].toString();
   }
 
   Map<String, dynamic> toJson() {
@@ -31,6 +34,7 @@ class User {
     data['password'] = password;
     data['phoneno'] = phoneno;
     data['homeaddress'] = homeaddress;
+    data['cart'] = cart.toString();
     return data;
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mytutor/views/subjectsscreen.dart';
+import 'package:mytutor/views/subscribescreen.dart';
 import 'package:mytutor/views/tutorsscreen.dart';
 
 import '../models/user.dart';
@@ -19,25 +20,6 @@ class _MainScreenState extends State<MainScreen> {
   late double screenHeight, screenWidth, ctrwidth;
   int _selectedIndex = 0;
 
-  static const TextStyle optionStyle =
-      TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
-  static const List<Widget> _widgetOptions = <Widget>[
-    SubjectsScreen(),
-    TutorsScreen(),
-    Text(
-      'Subscribe',
-      style: optionStyle,
-    ),
-    Text(
-      'Favourite',
-      style: optionStyle,
-    ),
-    Text(
-      'Profile',
-      style: optionStyle,
-    ),
-  ];
-
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -46,6 +28,24 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    TextStyle optionStyle =
+        const TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
+    List<Widget> _widgetOptions = <Widget>[
+      SubjectsScreen(
+        user: widget.user,
+      ),
+      const TutorsScreen(),
+      SubscribeScreen(user: widget.user),
+      Text(
+        'Favourite',
+        style: optionStyle,
+      ),
+      Text(
+        'Profile',
+        style: optionStyle,
+      ),
+    ];
+
     screenHeight = MediaQuery.of(context).size.height;
     screenWidth = MediaQuery.of(context).size.width;
     if (screenWidth >= 800) {
